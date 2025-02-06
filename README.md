@@ -1,17 +1,11 @@
-# APP - Plataforma de Gerenciamento de Músicas
+# APP - Plataforma de Gerenciamento de Tarefas
 
-Este projeto foi desenvolvido para criar uma plataforma de gerenciamento de músicas, permitindo que os administradores tenham controle total sobre funcionalidades como adicionar, editar, visualizar e excluir músicas, álbuns, artistas e playlists. O frontend foi desenvolvido utilizando React, com React Hook Form para o gerenciamento de formulários, React Query para manipulação eficiente de dados, e TypeScript para maior confiabilidade e escalabilidade.
+Este projeto foi desenvolvido para criar um aplicativo de gerenciamento de tarefas, permitindo que os usuários tenham controle sobre suas atividades diárias. O aplicativo oferece funcionalidades como adicionar, editar, visualizar, excluir tarefas e marcar o status de cada tarefa como completa ou incompleta. As tecnologias utilizadas foram React Native, React Query para manipulação eficiente de dados, e TypeScript para garantir maior segurança e escalabilidade no código.
 
 ### Clonando o repositório
 
 ```sh
-gh repo clone GuiOrlandin/goledger-challenge-web
-```
-
-### Navegue até o front-end
-
-```sh
-cd .\challenge-web\
+gh repo clone GuiOrlandin/desafio-shx
 ```
 
 ### Instale as dependências
