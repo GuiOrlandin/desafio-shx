@@ -1,74 +1,97 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { TaskCard } from "@/components/taskCard";
+import { Colors } from "@/constants/Colors";
+import { tasksFetch, useTaskMutations } from "@/service/getAllTasksFetch";
+import { useState } from "react";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+import {
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import { styles } from "../styles";
+import { ActivityIndicator } from "react-native-paper";
 
 export default function HomeScreen() {
+  const { data, isSuccess, isLoading, isError } = tasksFetch();
+  const [taskName, setTaskName] = useState<string>("");
+  const { addTaskMutation } = useTaskMutations();
+
+  function HandleAddTask() {
+    if (taskName.trim()) {
+      const newTask = {
+        id: uuidv4(),
+        title: taskName,
+        completed: false,
+      };
+      addTaskMutation.mutate(newTask);
+      setTaskName("");
+    }
+  }
+
+  function getGreeting() {
+    const hours = new Date().getHours();
+
+    if (hours >= 5 && hours < 12) {
+      return "Bom dia ☀️";
+    } else if (hours >= 12 && hours < 18) {
+      return "Boa tarde 🌤️";
+    } else {
+      return "Boa noite 🌙";
+    }
+  }
+
+  function getTodayDate() {
+    return format(new Date(), "EEEE, 'dia' d 'de' MMMM 'de' yyyy", {
+      locale: ptBR,
+    });
+  }
+
+  if (isError) {
+    return <Text>Erro ao carregar tarefas.</Text>;
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.homeContainer}>
+      <Text style={styles.greetingText}>{getGreeting()}</Text>
+      <Text style={styles.dateText}>{getTodayDate()}</Text>
+
+      <View style={styles.addTaskContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite uma nova tarefa..."
+          placeholderTextColor={Colors.dark.placeholder}
+          value={taskName}
+          onChangeText={(text) => setTaskName(text)}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => HandleAddTask()}
+        >
+          <Text style={styles.addButtonText}>Adicionar</Text>
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.title}>Tarefas</Text>
+
+      {isLoading && !isSuccess ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={data}
+          contentContainerStyle={{ gap: 12 }}
+          renderItem={({ item }) => <TaskCard task={item} />}
+          keyExtractor={(item) => item.id.toString()}
+        />
+      )}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
